@@ -151,6 +151,7 @@
 	["normal_nature"] = "无属性",
 	["fire_nature"] = "火属性",
 	["thunder_nature"] = "雷属性",
+	["ice_nature"] = "冰属性",
 	["#Contingency"] = "%to【%arg】 阵亡，无伤害来源",
 	["#DelayedTrick"] = "%from 的延时符卡【%arg】开始判定",
 	["#SkillNullify"] = "%from 的“%arg”被触发，【%arg2】对其无效",

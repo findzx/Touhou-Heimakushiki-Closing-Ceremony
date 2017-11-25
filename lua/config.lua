@@ -40,9 +40,10 @@ config = {
 
 	package_names = {
 		--卡牌包
+		"TestCard",
 		"StandardCard",
 		"StandardExCard",
-		"TestCard",
+		
 		"Maneuvering",
         
 		--武将包

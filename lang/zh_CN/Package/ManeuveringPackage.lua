@@ -3,10 +3,10 @@
 return {
 	["maneuvering"] = "军争篇",
 
-	["fire_slash"] = "火杀",
+	["fire_slash"] = "火幕",
 	[":fire_slash"] = "基本牌<br />出牌时机：出牌阶段<br />使用目标：攻击范围内的一名其他角色<br />作用效果：对目标角色造成1点火焰伤害",
 
-	["thunder_slash"] = "雷杀",
+	["thunder_slash"] = "雷幕",
 	[":thunder_slash"] = "基本牌<br />出牌时机：出牌阶段<br />使用目标：攻击范围内的一名其他角色<br />作用效果：对目标角色造成1点雷电伤害",
 
 	["analeptic"] = "酒",

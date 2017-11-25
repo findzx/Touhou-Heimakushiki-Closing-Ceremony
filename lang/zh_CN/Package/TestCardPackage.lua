@@ -1,9 +1,12 @@
 -- translation for ManeuveringPackage
 
 return {
-	["testCard"] = "东方杀测试牌",
+	["testCard"] = "避幕式测试牌堆",
 
-
+    ["ice_slash"] = "冰幕",
+	[":ice_slash"] = "基本牌<br />出牌时机：出牌阶段<br />使用目标：攻击范围内的一名其他角色<br />作用效果：对目标角色造成1点冰属性伤害",
+	
+	
 	["Camera"] = "照相机",
 	[":Camera"] = "装备牌·武器<br />攻击范围：４<br />武器特效：当你使用【杀】对目标角色造成伤害后，你可以依次明置其两张手牌。",
 

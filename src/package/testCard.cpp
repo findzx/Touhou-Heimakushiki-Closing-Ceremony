@@ -4,7 +4,7 @@
 #include "general.h"
 #include "room.h"
 
-
+#include "maneuvering.h"
 
 
 
@@ -407,14 +407,13 @@ TestCardPackage::TestCardPackage()
 {
     QList<Card *> cards;
 
-    cards << new Camera(Card::Diamond, 11) 
-        << new Gun(Card::Club, 13) 
-        << new JadeSeal(Card::Heart, 13) 
-        << new Camouflage(Card::Spade, 1) 
-
-        << new AwaitExhausted(Card::Diamond, 4) << new AwaitExhausted(Card::Heart, 10)
-        << new SpellDuel(Card::Heart, 1) << new SpellDuel(Card::Diamond, 1)
-        << new Kusuri(Card::Diamond, 3) << new Kusuri(Card::Heart, 8) << new Kusuri(Card::Heart, 9);
+    cards << new Slash(Card::Club, 7)
+        << new ThunderSlash(Card::Spade, 8)
+        << new FireSlash(Card::Heart, 9)
+        << new IceSlash(Card::Diamond, 10)
+        << new Jink(Card::Diamond, 11)
+        << new Peach(Card::Heart, 12)
+        << new Analeptic(Card::Spade, 13);
 
     foreach(Card *card, cards)
         card->setParent(this);
