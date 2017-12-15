@@ -1,4 +1,4 @@
--- translation for StandardPackage
+﻿-- translation for StandardPackage
 
 local t = {
 	["standard_cards"] = "标准版",
@@ -90,7 +90,7 @@ local t = {
 
 	["duel"] = "退治",
 	[":duel"] = "锦囊牌<br />出牌时机：出牌阶段<br />使用目标：一名其他角色<br />作用效果：由目标角色开始，你与其轮流打出一张【杀】，首先不打出【杀】的一方受到对方造成的1点伤害。",
-	["duel-slash"] = "%src 对你【退治】，你需要打出一张【杀】",
+	["duel-slash"] = "%src 对你【退治】，你需要打出一张【幕】",
 
 	["ex_nihilo"] = "无中生有",
 	[":ex_nihilo"] = "锦囊牌<br />出牌时机：出牌阶段<br />使用目标：包括你的一名角色<br />作用效果：摸两张牌。",

@@ -1,4 +1,4 @@
--- translation for ManeuveringPackage
+﻿-- translation for ManeuveringPackage
 
 return {
 	["maneuvering"] = "军争篇",
@@ -31,7 +31,7 @@ return {
 
 	["fire_attack"] = "春雪异变",
 	[":fire_attack"] = "锦囊牌<br />出牌时机：出牌阶段<br />使用目标：一名有手牌的角色。<br />作用效果：目标角色展示一张手牌。若你弃置一张与所展示牌相同花色的手牌，该角色受到1点水属性伤害",
-	["fire-attack-card"] = "您可以弃置一张与 %dest 所展示卡牌相同花色(%arg)的牌对 %dest 造成1点水属性伤害",
+	["fire-attack-card"] = "您可以弃置一张与 %dest 所展示卡牌相同花色(%arg)的牌对 %dest 造成1点冰属性伤害",
 	["@fire-attack"] = "%src 展示的牌的花色为 %arg，请弃置一张与其相同花色的手牌",
 
 	["iron_chain"] = "秘封结社",
