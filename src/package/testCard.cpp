@@ -406,15 +406,27 @@ TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
     QList<Card *> cards;
-
+    //Basic card
     cards << new Slash(Card::Club, 7)
         << new ThunderSlash(Card::Spade, 8)
         << new FireSlash(Card::Heart, 9)
         << new IceSlash(Card::Diamond, 10)
         << new Jink(Card::Diamond, 11)
         << new Peach(Card::Heart, 12)
-        << new Analeptic(Card::Spade, 13);
+        << new Analeptic(Card::Spade, 13)
 
+        //Trick card
+        << new AmazingGrace(Card::Heart, 4)
+        << new FireAttack(Card::Heart, 5)
+        << new GodSalvation(Card::Heart, 1)
+        << new Nullification(Card::Club, 12)
+        << new Dismantlement(Card::Club, 7)
+        << new AwaitExhausted(Card::Heart, 1)
+        << new KnownBoth(Card::Spade, 13)
+        << new IronChain(Card::Club, 13)
+        << new Collateral(Card::Club, 13)
+        << new Duel(Card::Club, 1);;
+       
     foreach(Card *card, cards)
         card->setParent(this);
 

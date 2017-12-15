@@ -138,8 +138,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     systray = NULL;
 
-    if (Config.EnableAutoUpdate)
-        checkForUpdate();
+    //if (Config.EnableAutoUpdate)
+    //    checkForUpdate();
 }
 
 void MainWindow::restoreFromConfig()
