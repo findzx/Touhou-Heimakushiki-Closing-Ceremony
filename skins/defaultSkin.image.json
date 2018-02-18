@@ -180,7 +180,8 @@
 "dashboardKingdomColorMask-default": "image/kingdom/frame/dashboard/%1.png",
 
 // cards
-"handCardMainPhoto-default": "image/card/%1.png",
+//"handCardMainPhoto-default": "image/card/%1.png",
+"handCardMainPhoto-default": "image/card/%1.jpg",
 "handCardMainPhoto-default2": "image/generals/card/%1.jpg",
 "handCardMainPhoto-unknown": "image/system/card-back.png",
 
