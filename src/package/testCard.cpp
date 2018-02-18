@@ -4,8 +4,10 @@
 #include "general.h"
 #include "room.h"
 
-#include "maneuvering.h"
 
+
+#include "maneuvering.h"
+#include "standard-equips.h"
 
 
 class CameraSkill : public WeaponSkill
@@ -421,11 +423,29 @@ TestCardPackage::TestCardPackage()
         << new GodSalvation(Card::Heart, 1)
         << new Nullification(Card::Club, 12)
         << new Dismantlement(Card::Club, 7)
+        << new Snatch(Card::Club, 7)
         << new AwaitExhausted(Card::Heart, 1)
         << new KnownBoth(Card::Spade, 13)
         << new IronChain(Card::Club, 13)
         << new Collateral(Card::Club, 13)
-        << new Duel(Card::Club, 1);;
+        << new Duel(Card::Club, 1)
+        << new SavageAssault(Card::Club, 1)
+        << new ArcheryAttack(Card::Club, 1)
+        << new ExNihilo(Card::Club, 1)
+        << new Indulgence(Card::Club, 1)
+        << new Lightning(Card::Club, 1)
+        
+        //Equip Card
+        << new Halberd(Card::Club, 1)
+        << new EightDiagram(Card::Club, 1)
+        << new Axe(Card::Club, 1)
+        << new Vine(Card::Club, 1)
+        << new Spear(Card::Club, 1)
+        << new QinggangSword(Card::Club, 1)
+        << new KylinBow(Card::Club, 1)
+        << new IceSword(Card::Club, 1)
+        << new SilverLion(Card::Club, 1)
+        ;;
        
     foreach(Card *card, cards)
         card->setParent(this);
