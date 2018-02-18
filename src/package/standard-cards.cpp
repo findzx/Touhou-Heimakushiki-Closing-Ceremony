@@ -652,7 +652,7 @@ public:
 };
 
 QinggangSword::QinggangSword(Suit suit, int number)
-    : Weapon(suit, number, 2)
+    : Weapon(suit, number, 3)
 {
     setObjectName("QinggangSword");
 }
