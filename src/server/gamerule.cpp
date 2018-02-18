@@ -301,9 +301,13 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<Skil
                     CardMoveReason reason(CardMoveReason::S_REASON_USE, card_use.from->objectName(), QString(), card_use.card->getSkillName(), QString());
                     reason.m_extraData = QVariant::fromValue(card_use.card);
                     room->moveCardTo(card_use.card, card_use.from, NULL, Player::DiscardPile, reason, true);
-                    break;
+                    //break;
                 }
             }
+
+            //since use.to is empty, break the whole process
+            if (card_use.card && card_use.card->getTypeId() != Card::TypeSkill && card_use.to.isEmpty())
+                break;
 
             try {
                 QVariantList jink_list_backup;
