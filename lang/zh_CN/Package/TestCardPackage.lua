@@ -14,6 +14,10 @@ return {
 	[":Gun"] = "装备牌·武器<br />攻击范围：４<br />武器特效：<font color=\"blue\"><b>锁定技，</b></font>当你使用【杀】对其他角色造成伤害后，横置该角色装备区的所有牌。",
 	["#Gun"]= "%from 对 %to 触发了 %arg 的效果",
 	
+	["RoukankenHakurouken"] = "楼观白楼",
+	[":RoukankenHakurouken"] = "装备牌·武器<br />攻击范围：1<br />武器特效：<font color=\"blue\"><b>锁定技，</b></font>当你使用【杀】指定目标角色后，需依次使用两张【避】才能抵消此【幕】。",
+	--["#Gun"]= "%from 对 %to 触发了 %arg 的效果",
+	
 	["JadeSeal"] = "玉玺",
 	[":JadeSeal"] = "装备牌·宝物\n\n技能：出牌阶段限一次。你可以视为使用【知己知彼】。",
 	["~JadeSeal"] = "选择【知己知彼】的目标→点击确定",

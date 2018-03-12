@@ -9,6 +9,55 @@
 #include "maneuvering.h"
 #include "standard-equips.h"
 
+class RoukankenHakuroukenSkill : public WeaponSkill
+{
+public:
+    RoukankenHakuroukenSkill()
+        : WeaponSkill("RoukankenHakurouken")
+    {
+        events << TargetSpecified;
+        frequency = Compulsory;
+    }
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent e, const Room *, const QVariant &data) const
+    {
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (!equipAvailable(use.from, EquipCard::WeaponLocation, objectName()))
+            return QList<SkillInvokeDetail>();
+
+        if (use.card != NULL && use.card->isKindOf("Slash")) {
+            QList<SkillInvokeDetail> d;
+            foreach(ServerPlayer *p, use.to) {
+                if (p->isAlive()) 
+                    d << SkillInvokeDetail(this, use.from, use.from, NULL, true, p);
+                
+            }
+            return d;
+        }
+        return QList<SkillInvokeDetail>();
+    }
+
+    
+
+    bool effect(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        CardUseStruct use = data.value<CardUseStruct>();
+        QVariantList jink_list = invoke->invoker->tag["Jink_" + use.card->toString()].toList();
+        for (int i = 0; i < use.to.length(); i++) {
+            if (jink_list.at(i).toInt() == 1)
+                jink_list.replace(i, QVariant(2));
+        }
+        invoke->invoker->tag["Jink_" + use.card->toString()] = QVariant::fromValue(jink_list);
+        return false;
+    }
+};
+
+RoukankenHakurouken::RoukankenHakurouken(Card::Suit suit, int number)
+    : Weapon(suit, number, 1)
+{
+    setObjectName("RoukankenHakurouken");
+}
+
 
 class CameraSkill : public WeaponSkill
 {
@@ -429,6 +478,7 @@ TestCardPackage::TestCardPackage()
         << new IronChain(Card::Club, 13)
         << new Collateral(Card::Club, 13)
         << new Duel(Card::Club, 1)
+        << new Drowning(Card::Club, 1) //   Illegal Dumping
         << new SavageAssault(Card::Club, 1)
         << new ArcheryAttack(Card::Club, 1)
         << new ExNihilo(Card::Club, 1)
@@ -444,6 +494,7 @@ TestCardPackage::TestCardPackage()
         << new QinggangSword(Card::Club, 1)
         << new KylinBow(Card::Club, 1)
         << new IceSword(Card::Club, 1)
+        << new RoukankenHakurouken(Card::Club, 1)
         << new SilverLion(Card::Club, 1)
         ;;
        
@@ -451,7 +502,7 @@ TestCardPackage::TestCardPackage()
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
-        <<new CamouflageSkill;
+        <<new CamouflageSkill << new RoukankenHakuroukenSkill;
 }
 
 ADD_PACKAGE(TestCard)

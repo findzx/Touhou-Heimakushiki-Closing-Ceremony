@@ -1928,74 +1928,54 @@ public:
     }
 };
 
+
+
 Drowning::Drowning(Suit suit, int number)
-    : AOE(suit, number)
+    : SingleTargetTrick(suit, number)
 {
     setObjectName("drowning");
 }
 
-void Drowning::onUse(Room *room, const CardUseStruct &card_use) const
+bool Drowning::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
 {
-    ServerPlayer *source = card_use.from;
-    QList<ServerPlayer *> targets, other_players = room->getOtherPlayers(source);
-    foreach (ServerPlayer *player, other_players) {
-        const ProhibitSkill *skill = room->isProhibited(source, player, this);
-        if (skill) {
-            LogMessage log;
-            log.type = "#SkillAvoid";
-            log.from = player;
-            log.arg = skill->objectName();
-            log.arg2 = objectName();
-            room->sendLog(log);
+    int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
+    if (targets.length() >= total_num)
+        return false;
 
-            if (player->hasSkill(skill))
-                room->notifySkillInvoked(player, skill->objectName());
-            room->broadcastSkillInvoke(skill->objectName());
-        } else if (!player->canDiscard(player, "e"))
-            continue;
-        else
-            targets << player;
-    }
-
-    CardUseStruct use = card_use;
-    use.to = targets;
-    TrickCard::onUse(room, use);
+    return to_select->hasEquip() && to_select != Self;
 }
 
 void Drowning::onEffect(const CardEffectStruct &effect) const
 {
     Room *room = effect.to->getRoom();
-    if (!effect.to->getEquips().isEmpty() && effect.to->canDiscard(effect.to, "e")) {
-        const Card *card = room->askForCard(effect.to, ".|.|.|equipped!", "@drowning");
-        // force discard!!!
-        if (!card) {
-            QList<const Card *> equips = effect.to->getCards("e");
-            foreach (const Card *c, equips) {
-                if (effect.to->isJilei(c))
-                    equips.removeOne(c);
-            }
-            if (!equips.isEmpty()) {
-                int x = qrand() % equips.length();
-                room->throwCard(equips.value(x), effect.to);
-            }
-        }
+    bool damage = true;
+    if (effect.to->canDiscard(effect.to, "e")) {
+        const Card *c = room->askForCard(effect.to, ".|.|.|equipped", "@drowning:" + effect.from->objectName());
+        if (c)
+            damage = false;
     }
+        
+    if (damage)
+        room->damage(DamageStruct(this, effect.from->isAlive() ? effect.from : NULL, effect.to, 1, DamageStruct::Normal));
 }
 
 bool Drowning::isAvailable(const Player *player) const
 {
     bool canUse = false;
     QList<const Player *> players = player->getAliveSiblings();
-    foreach (const Player *p, players) {
-        if (player->isProhibited(p, this) || !p->canDiscard(p, "e"))
+    foreach(const Player *p, players) {
+        if (player->isProhibited(p, this))
             continue;
-
+        if (!p->hasEquip())
+            continue;
         canUse = true;
         break;
     }
 
     return canUse && TrickCard::isAvailable(player);
 }
+
+
 
 KnownBoth::KnownBoth(Card::Suit suit, int number)
     : TrickCard(suit, number)

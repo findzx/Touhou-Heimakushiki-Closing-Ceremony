@@ -145,6 +145,14 @@ public:
     Q_INVOKABLE DeathSickle(Card::Suit suit, int number);
 };
 
+class RoukankenHakurouken : public Weapon
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE RoukankenHakurouken(Card::Suit suit, int number);
+};
+
 class StandardCardPackage : public Package
 {
     Q_OBJECT
