@@ -2008,13 +2008,29 @@ bool KnownBoth::targetsFeasible(const QList<const Player *> &targets, const Play
 
 void KnownBoth::onEffect(const CardEffectStruct &effect) const
 {
+    int throw_id = -1;
     if (!effect.to->isKongcheng()) {
         Room *room = effect.from->getRoom();
-        room->showAllCards(effect.to, effect.from);
-        room->getThread()->delay(1000);
-        room->clearAG(effect.from);
+        QList<int> ids, able, disable;
+        foreach(const Card *c, effect.to->getHandcards()) {
+            int id = c->getEffectiveId();
+            ids << id;
+            if (effect.from->canDiscard(effect.to, id))
+                able << id;
+            else
+                disable << id;
+        }
+        if (!able.isEmpty()) {
+            room->fillAG(ids, effect.from, disable);
+            throw_id = room->askForAG(effect.from, able, true, objectName());
+            room->clearAG(effect.from);
+            if (throw_id > -1)
+                room->throwCard(throw_id, effect.to, effect.from);
+        }
+        //room->showAllCards(effect.to, effect.from);
     }
-    effect.from->drawCards(1);
+    if (throw_id == -1)
+        effect.from->drawCards(1);
 }
 
 

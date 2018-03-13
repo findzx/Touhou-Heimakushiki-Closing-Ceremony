@@ -320,7 +320,10 @@ AwaitExhausted::AwaitExhausted(Card::Suit suit, int number)
 bool AwaitExhausted::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
 {
     int total_num = 2 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    return targets.length() < total_num && !Self->isCardLimited(this, Card::MethodUse);
+    if (targets.isEmpty())
+        return to_select == Self && !Self->isCardLimited(this, Card::MethodUse);
+    else
+        return targets.length() < total_num && !Self->isCardLimited(this, Card::MethodUse);
 }
 
 void AwaitExhausted::onEffect(const CardEffectStruct &effect) const
@@ -452,39 +455,98 @@ void Kusuri::onEffect(const CardEffectStruct &effect) const
 }
 
 
+GassingGarden::GassingGarden(Suit suit, int number)
+    : DelayedTrick(suit, number)
+{
+    setObjectName("gassing_garden");
+
+    judge.pattern = ".|diamond";
+    judge.good = true;
+    judge.reason = objectName();
+}
+
+QString GassingGarden::getSubtype() const
+{
+    return "unmovable_delayed_trick";
+}
+
+bool GassingGarden::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
+{
+    return targets.isEmpty() && !to_select->containsTrick(objectName()) && to_select != Self;
+}
+
+void GassingGarden::takeEffect(ServerPlayer *target) const
+{
+    target->getRoom()->loseHp(target);
+}
+
+Donation::Donation(Suit suit, int number)
+    : DelayedTrick(suit, number)
+{
+    setObjectName("donation");
+
+    judge.pattern = ".|spade";
+    judge.good = true;
+    judge.reason = objectName();
+}
+
+QString Donation::getSubtype() const
+{
+    return "unmovable_delayed_trick";
+}
+
+bool Donation::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
+{
+    return targets.isEmpty() && !to_select->containsTrick(objectName()) && to_select != Self;
+}
+
+void Donation::takeEffect(ServerPlayer *target) const
+{
+    int num = qMin(target->getCards("hes").length(), 2);
+    if (num > 0)
+        target->getRoom()->askForDiscard(target, objectName(), 2, 2, false, true);
+}
+
 
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
     QList<Card *> cards;
     //Basic card
-    cards << new Slash(Card::Club, 7)
-        << new ThunderSlash(Card::Spade, 8)
-        << new FireSlash(Card::Heart, 9)
-        << new IceSlash(Card::Diamond, 10)
-        << new Jink(Card::Diamond, 11)
-        << new Peach(Card::Heart, 12)
-        << new Analeptic(Card::Spade, 13)
+    cards << new Slash(Card::Club, 7)   //   Maku
+        << new ThunderSlash(Card::Spade, 8)//   Maku(Thunder)
+        << new FireSlash(Card::Heart, 9)//   Maku(Fire)
+        << new IceSlash(Card::Diamond, 10) ////   Maku(Ice)
+        << new Jink(Card::Diamond, 11)    //     Hei
+        << new Peach(Card::Heart, 12)    // Yaku
+        << new Analeptic(Card::Spade, 13) // Sake
 
         //Trick card
-        << new AmazingGrace(Card::Heart, 4)
-        << new FireAttack(Card::Heart, 5)
-        << new GodSalvation(Card::Heart, 1)
-        << new Nullification(Card::Club, 12)
-        << new Dismantlement(Card::Club, 7)
-        << new Snatch(Card::Club, 7)
-        << new AwaitExhausted(Card::Heart, 1)
-        << new KnownBoth(Card::Spade, 13)
-        << new IronChain(Card::Club, 13)
-        << new Collateral(Card::Club, 13)
-        << new Duel(Card::Club, 1)
         << new Drowning(Card::Club, 1) //   Illegal Dumping
-        << new SavageAssault(Card::Club, 1)
-        << new ArcheryAttack(Card::Club, 1)
-        << new ExNihilo(Card::Club, 1)
-        << new Indulgence(Card::Club, 1)
-        << new Lightning(Card::Club, 1)
+        << new FireAttack(Card::Heart, 5) // Spring Snow Incident
+        << new GodSalvation(Card::Heart, 1)// Great Geyser
+        << new Nullification(Card::Club, 12)//  Card Breaker
+        << new AwaitExhausted(Card::Heart, 1)// Reincarnation of Inside
+        << new AmazingGrace(Card::Heart, 4)// Festival Banquet
+        << new KnownBoth(Card::Spade, 13)// Thought Reading
+        << new IronChain(Card::Club, 13)// Secret Sealing Club
+        << new Collateral(Card::Club, 13)// Seija's Ambition
+        << new Duel(Card::Club, 1)// Extermination
+        << new Dismantlement(Card::Club, 7)// Ayafs Interview
+
+        << new Snatch(Card::Club, 7)// need check  //World of Hidden
         
+        << new ExNihilo(Card::Club, 1) // A Special Gift
+        << new ArcheryAttack(Card::Club, 1) // Catastrophe
+        << new SavageAssault(Card::Club, 1)// Lunar War
+
+        << new GassingGarden(Card::Club, 1) // need check // Gassing Garden
+        
+        << new Indulgence(Card::Club, 1)// Confinement
+       <<new Donation(Card::Club, 1) //Donation
+        << new Lightning(Card::Club, 1) // God Penalty
+        <<new SupplyShortage(Card::Club, 1)// Lack of Faith
+
         //Equip Card
         << new Halberd(Card::Club, 1)
         << new EightDiagram(Card::Club, 1)

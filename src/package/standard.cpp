@@ -356,7 +356,16 @@ void DelayedTrick::onEffect(const CardEffectStruct &effect) const
     } else if (movable) {
         onNullified(effect.to);
     } else {
-        if (room->getCardOwner(getEffectiveId()) == NULL) {
+        if (this->isKindOf("GassingGarden") && room->getCardOwner(getEffectiveId()) == NULL) {
+            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
+            CardsMoveStruct move;
+            move.reason = reason;
+            move.card_ids << this->getSubcards();
+            move.to = effect.to;
+            move.to_place = Player::PlaceDelayedTrick;
+            room->moveCardsAtomic(move, true);
+        }
+        else if (room->getCardOwner(getEffectiveId()) == NULL) {
             CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, QString());
             room->throwCard(this, reason, NULL);
         }
