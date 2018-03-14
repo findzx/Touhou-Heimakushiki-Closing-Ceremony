@@ -657,6 +657,7 @@ QinggangSword::QinggangSword(Suit suit, int number)
     setObjectName("QinggangSword");
 }
 
+/*
 class BladeSkill : public WeaponSkill
 {
 public:
@@ -698,13 +699,14 @@ public:
 
         return false;
     }
-};
+};*/
 
+/*
 Blade::Blade(Suit suit, int number)
     : Weapon(suit, number, 3)
 {
     setObjectName("Blade");
-}
+}*/
 
 class SpearSkill : public ViewAsSkill
 {
@@ -745,7 +747,7 @@ public:
         if (cards.length() != 2)
             return NULL;
 
-        Slash *slash = new Slash(Card::SuitToBeDecided, 0);
+        FireSlash *slash = new FireSlash(Card::SuitToBeDecided, 0);
         slash->setSkillName(objectName());
         slash->addSubcards(cards);
         return slash;
@@ -868,6 +870,36 @@ Halberd::Halberd(Suit suit, int number)
     setObjectName("Halberd");
 }
 
+
+class KylinBowViewAsSkill : public ViewAsSkill
+{
+public:
+    KylinBowViewAsSkill()
+        : ViewAsSkill("KylinBow")
+    {
+        response_pattern = "@KylinBow";
+        
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const
+    {
+        if (Self->hasWeapon(objectName(), true) && to_select == Self->getWeapon()) //check if cannot throw selfweapon
+            return false;
+        return selected.isEmpty() && !Self->isJilei(to_select);
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const
+    {
+        if (cards.length() != 1)
+            return NULL;
+
+        DummyCard *card = new DummyCard;
+        card->setSkillName(objectName());
+        card->addSubcards(cards);
+        return card;
+    }
+};
+
 class KylinBowSkill : public WeaponSkill
 {
 public:
@@ -875,6 +907,7 @@ public:
         : WeaponSkill("KylinBow")
     {
         events << DamageCaused;
+        view_as_skill = new KylinBowViewAsSkill;
     }
 
     QList<SkillInvokeDetail> triggerable(TriggerEvent, const Room *, const QVariant &data) const
@@ -883,30 +916,35 @@ public:
         if (!equipAvailable(damage.from, EquipCard::WeaponLocation, objectName(), damage.to))
             return QList<SkillInvokeDetail>();
 
-        if (damage.card && damage.card->isKindOf("Slash") && damage.by_user && !damage.chain && !damage.transfer) {
-            if (damage.to->getDefensiveHorse() && damage.from->canDiscard(damage.to, damage.to->getDefensiveHorse()->getEffectiveId()))
-                return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, damage.from, damage.from, NULL, false, damage.to);
-            if (damage.to->getOffensiveHorse() && damage.from->canDiscard(damage.to, damage.to->getOffensiveHorse()->getEffectiveId()))
+        //&& !damage.chain && !damage.transfer
+        if (damage.card && damage.card->isKindOf("Slash") && damage.by_user
+            && damage.from && damage.from->isAlive() && damage.from->canDiscard(damage.from, "hes")
+            && damage.to->isAlive() && damage.from->canDiscard(damage.to, "ej")) {
+            
                 return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, damage.from, damage.from, NULL, false, damage.to);
         }
         return QList<SkillInvokeDetail>();
     }
 
+    bool cost(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        return room->askForCard(invoke->invoker, "@KylinBow", "@KylinBow:" +  invoke->preferredTarget->objectName());
+        //return room->askForDiscard(invoke->invoker, objectName(), 1, 1, true, true, "@kylinbow");
+    }
+
     bool effect(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
     {
-        QStringList horses;
         DamageStruct damage = data.value<DamageStruct>();
-        if (damage.to->getDefensiveHorse() && damage.from->canDiscard(damage.to, damage.to->getDefensiveHorse()->getEffectiveId()))
-            horses << "dhorse";
-        if (damage.to->getOffensiveHorse() && damage.from->canDiscard(damage.to, damage.to->getOffensiveHorse()->getEffectiveId()))
-            horses << "ohorse";
+        /*QList<int> disable;
+        foreach(const Card*c, damage.to->getCards("ej")) {
+            if (!damage.from->canDiscard(damage.to, c->getEffectiveId()))
+                disable << c->getEffectiveId();
+        }*/
 
-        QString horse_type = room->askForChoice(invoke->invoker, objectName(), horses.join("+"));
+        int id = room->askForCardChosen(invoke->invoker, damage.to, "ej", objectName(), false, Card::MethodDiscard);
         room->setEmotion(invoke->invoker, "weapon/kylin_bow");
-        if (horse_type == "dhorse")
-            room->throwCard(damage.to->getDefensiveHorse(), damage.to, damage.from);
-        else if (horse_type == "ohorse")
-            room->throwCard(damage.to->getOffensiveHorse(), damage.to, damage.from);
+        if (id > -1)
+            room->throwCard(id, damage.to, damage.from);
 
         return false;
     }
@@ -2247,8 +2285,8 @@ StandardCardPackage::StandardCardPackage()
 
     // clang-format on
 
-    skills << new DoubleSwordSkill << new QinggangSwordSkill << new BladeSkill << new SpearSkill << new AxeSkill << new KylinBowSkill << new EightDiagramSkill << new HalberdSkill
-           << new BreastPlateSkill << new TribladeSkill;
+    skills << new DoubleSwordSkill << new QinggangSwordSkill  << new SpearSkill << new AxeSkill << new KylinBowSkill << new EightDiagramSkill << new HalberdSkill
+           << new BreastPlateSkill << new TribladeSkill; //<< new BladeSkill
 
     QList<Card *> horses;
 

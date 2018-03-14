@@ -508,6 +508,51 @@ void Donation::takeEffect(ServerPlayer *target) const
 }
 
 
+class BladeSkill : public WeaponSkill
+{
+public:
+    BladeSkill() : WeaponSkill("Blade")
+    {
+        events << SlashMissed;
+    }
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent, const Room *, const QVariant &data) const
+    {
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if (!equipAvailable(effect.from, EquipCard::WeaponLocation, objectName()))
+            return QList<SkillInvokeDetail>();
+        if (!effect.to->isAlive() || effect.to->getMark("Equips_of_Others_Nullified_to_You") > 0)
+            return QList<SkillInvokeDetail>();
+        if (!effect.from->canSlash(effect.to, NULL, false))
+            return QList<SkillInvokeDetail>();
+        return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, effect.from, effect.from);
+
+    }
+
+    bool cost(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+
+        int weapon_id = effect.from->getWeapon()->getId();
+        if (weapon_id > -1)
+            room->setCardFlag(weapon_id, "using");
+        effect.from->setFlags("BladeUse");
+        bool use = room->askForUseSlashTo(effect.from, effect.to, QString("blade-slash:%1").arg(effect.to->objectName()), false, true);
+        if (!use) effect.from->setFlags("-BladeUse");
+        if (weapon_id > -1)
+            room->setCardFlag(weapon_id, "-using");
+        return use;
+    }
+};
+
+Blade::Blade(Suit suit, int number)
+    : Weapon(suit, number, 3)
+{
+    setObjectName("Blade");
+}
+
+
+
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
@@ -548,15 +593,26 @@ TestCardPackage::TestCardPackage()
         <<new SupplyShortage(Card::Club, 1)// Lack of Faith
 
         //Equip Card
-        << new Halberd(Card::Club, 1)
+        << new GudingBlade(Card::Club, 1) // Hakkero
+        << new RoukankenHakurouken(Card::Club, 1) // Roukanken & Hakurouken
+        << new QinggangSword(Card::Club, 1) // Qingefs Hairpin
+
+        << new Blade(Card::Club, 1) // need check // Sword of Hisou
+
+        << new KylinBow(Card::Club, 1) // Ofuda
+        << new Halberd(Card::Club, 1) // Lunatic Gun
+        << new IceSword(Card::Club, 1) // Leica M3
+        << new Axe(Card::Club, 1) // Honored Pillars
+        << new Spear(Card::Club, 1) // Nuclear Control Rod
+
         << new EightDiagram(Card::Club, 1)
-        << new Axe(Card::Club, 1)
+        
         << new Vine(Card::Club, 1)
-        << new Spear(Card::Club, 1)
-        << new QinggangSword(Card::Club, 1)
-        << new KylinBow(Card::Club, 1)
-        << new IceSword(Card::Club, 1)
-        << new RoukankenHakurouken(Card::Club, 1)
+        
+       
+
+
+
         << new SilverLion(Card::Club, 1)
         ;;
        
@@ -564,7 +620,7 @@ TestCardPackage::TestCardPackage()
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
-        <<new CamouflageSkill << new RoukankenHakuroukenSkill;
+        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill;
 }
 
 ADD_PACKAGE(TestCard)
