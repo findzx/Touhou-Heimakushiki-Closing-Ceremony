@@ -551,7 +551,71 @@ Blade::Blade(Suit suit, int number)
     setObjectName("Blade");
 }
 
+VSCrossbow::VSCrossbow(Suit suit, int number)
+    : Crossbow(suit, number)
+{
+    setObjectName("vscrossbow");
+}
 
+bool VSCrossbow::match(const QString &pattern) const
+{
+    QStringList patterns = pattern.split("+");
+    if (patterns.contains("crossbow"))
+        return true;
+    else
+        return Crossbow::match(pattern);
+}
+
+class VSCrossbowSkill : public WeaponSkill
+{
+public:
+    VSCrossbowSkill() : WeaponSkill("vscrossbow")
+    {
+        events << CardUsed << EventPhaseChanging;
+        frequency = Compulsory;
+    }
+
+    void record(TriggerEvent e, Room *room, QVariant &data) const
+    {
+        if (e == CardUsed) {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.from && use.from->isAlive() && use.card && use.card->isKindOf("Slash")) {
+                if (!use.from->hasFlag("crossbow_first"))
+                    use.from->setFlags("crossbow_first");
+                else if (!use.from->hasFlag("crossbow_second")) {
+                    use.from->setFlags("crossbow_second");
+                    room->setCardFlag(use.card, "crossbow_second");
+                }
+            }
+            if (e == EventPhaseChanging) {
+                foreach(ServerPlayer *p, room->getAllPlayers()) {
+                    p->setFlags("-crossbow_first");
+                    p->setFlags("-crossbow_second");
+                }
+            }
+        }
+    }
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent e, const Room *, const QVariant &data) const
+    {
+        if (e == CardUsed) {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.from && use.from->isAlive() && use.card && use.card->hasFlag("crossbow_second")) {
+                if (!equipAvailable(use.from, EquipCard::WeaponLocation, objectName()))
+                    return QList<SkillInvokeDetail>();
+                return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, use.from, use.from, NULL, true);
+            }
+        }
+        return QList<SkillInvokeDetail>();
+    }
+
+    bool cost(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        room->touhouLogmessage("#InvokeSkill", invoke->invoker, objectName());
+        invoke->invoker->drawCards(1);
+        return false;
+    }
+};
 
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
@@ -602,6 +666,7 @@ TestCardPackage::TestCardPackage()
         << new KylinBow(Card::Club, 1) // Ofuda
         << new Halberd(Card::Club, 1) // Lunatic Gun
         << new IceSword(Card::Club, 1) // Leica M3
+        <<new VSCrossbow(Card::Club, 1)//Hourai Ningyo
         << new Axe(Card::Club, 1) // Honored Pillars
         << new Spear(Card::Club, 1) // Nuclear Control Rod
 
@@ -620,7 +685,7 @@ TestCardPackage::TestCardPackage()
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
-        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill;
+        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill;
 }
 
 ADD_PACKAGE(TestCard)

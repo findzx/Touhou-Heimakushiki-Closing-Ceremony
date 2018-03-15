@@ -153,6 +153,16 @@ public:
     Q_INVOKABLE RoukankenHakurouken(Card::Suit suit, int number);
 };
 
+class VSCrossbow : public Crossbow
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE VSCrossbow(Card::Suit suit, int number = 1);
+
+    bool match(const QString &pattern) const;
+};
+
 class StandardCardPackage : public Package
 {
     Q_OBJECT

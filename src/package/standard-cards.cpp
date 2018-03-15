@@ -54,7 +54,7 @@ bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSp
         int used = player->getSlashCount();
 
         int valid = 1 + Sanguosha->correctCardTarget(TargetModSkill::Residue, player, THIS_SLASH);
-        if ((!has_weapon && player->hasWeapon("VSCrossbow")) && used < valid + 3)
+        if ((!has_weapon && player->hasWeapon("VSCrossbow")) && used < valid + 1)
             return true;
 
         if (considerSpecificAssignee) {
@@ -441,7 +441,7 @@ bool Peach::isAvailable(const Player *player) const
 }
 
 Crossbow::Crossbow(Suit suit, int number)
-    : Weapon(suit, number, 1)
+    : Weapon(suit, number, 2)
 {
     setObjectName("Crossbow");
 }
