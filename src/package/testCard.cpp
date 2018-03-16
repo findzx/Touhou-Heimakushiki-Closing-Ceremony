@@ -617,6 +617,106 @@ public:
     }
 };
 
+
+class RobeSkill : public ArmorSkill
+{
+public:
+    RobeSkill()
+        : ArmorSkill("Robe")
+    {
+        events << DamageInflicted;
+        frequency = Compulsory;
+    }
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent triggerEvent, const Room *, const QVariant &data) const
+    {
+        DamageStruct damage = data.value<DamageStruct>();
+        if (equipAvailable(damage.to, EquipCard::ArmorLocation, objectName()) && damage.nature != DamageStruct::Normal)
+            return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, damage.to, damage.to, NULL, true); 
+        return QList<SkillInvokeDetail>();
+    }
+
+    bool effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        DamageStruct damage = data.value<DamageStruct>();
+        LogMessage log;
+        log.type = "#BreastPlate";
+        log.from = invoke->invoker;
+        if (damage.from)
+            log.to << damage.from;
+        log.arg = QString::number(damage.damage);
+        if (damage.nature == DamageStruct::Ice)
+            log.arg2 = "ice_nature";
+        else if (damage.nature == DamageStruct::Fire)
+            log.arg2 = "fire_nature";
+        else if (damage.nature == DamageStruct::Thunder)
+            log.arg2 = "thunder_nature";
+        room->sendLog(log);
+        return true;
+    }
+};
+
+Robe::Robe(Suit suit, int number)
+    : Armor(suit, number)
+{
+    setObjectName("Robe");
+}
+
+
+class RaimentSkill : public ArmorSkill
+{
+public:
+    RaimentSkill() : ArmorSkill("Raiment")
+    {
+        events << CardResponded;
+    }
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent e, const Room *, const QVariant &data) const
+    {
+        
+        CardResponseStruct resp = data.value<CardResponseStruct>();
+
+        if (resp.m_from && resp.m_card && resp.m_card->isKindOf("Jink") && resp.m_isUse
+            && equipAvailable(resp.m_from, EquipCard::ArmorLocation, objectName())
+                && resp.m_who != NULL && resp.m_who->isAlive()) {
+                return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, resp.m_from, resp.m_from, NULL, false, resp.m_who);        
+        }
+        
+        return  QList<SkillInvokeDetail>();
+    }
+
+    bool effect(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        CardResponseStruct resp = data.value<CardResponseStruct>();
+        //QString pattern = "colorless";
+        //if (resp.m_card->isRed())
+        //    pattern = "red";
+        //if (resp.m_card->isBlack())
+        //    pattern = "black";
+        
+        JudgeStruct judge;
+        judge.reason = objectName();
+        judge.who = invoke->invoker;
+        judge.good = true;
+        judge.pattern = ".|black";
+        //judge.pattern = QString(".|.|.|%1").arg(resp.m_card->getSuitString());
+
+        room->judge(judge);
+        //invoke->invoker->gainMark("@" + judge.pattern);
+        if (judge.isGood()) {
+            room->damage(DamageStruct(objectName(), invoke->invoker, invoke->targets.first(), 1, DamageStruct::Thunder));
+        }
+        return false;
+    }
+};
+
+
+Raiment::Raiment(Suit suit, int number)
+    : Armor(suit, number)
+{
+    setObjectName("Raiment");
+}
+
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
@@ -670,22 +770,26 @@ TestCardPackage::TestCardPackage()
         << new Axe(Card::Club, 1) // Honored Pillars
         << new Spear(Card::Club, 1) // Nuclear Control Rod
 
-        << new EightDiagram(Card::Club, 1)
         
-        << new Vine(Card::Club, 1)
         
-       
+        << new SilverLion(Card::Club, 1) // Hina Doll
 
+        << new Vine(Card::Club, 1) //need check //Optical Camouflage
+        
+        << new Robe(Card::Club, 1) // Robe of the Fire-rat
+        << new Raiment(Card::Club, 1) // Angel's Raiment
+        << new BreastPlate(Card::Club, 1) // Shanghai Ningyo
 
-
-        << new SilverLion(Card::Club, 1)
+        << new RenwangShield(Card::Club, 1)//need check // Tengufs Shield
+        
+        << new EightDiagram(Card::Club, 1) // Yukari's Gap
         ;;
        
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
-        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill;
+        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill;
 }
 
 ADD_PACKAGE(TestCard)

@@ -490,4 +490,12 @@ public:
     virtual void takeEffect(ServerPlayer *target) const;
 };
 
+class Robe : public Armor
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Robe(Card::Suit suit, int number);
+};
+
 #endif

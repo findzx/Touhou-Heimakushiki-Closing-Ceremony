@@ -108,6 +108,15 @@ public:
     virtual void takeEffect(ServerPlayer *target) const;
 };
 
+
+class Raiment : public Armor
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Raiment(Card::Suit suit, int number);
+};
+
 class TestCardPackage : public Package
 {
     Q_OBJECT
