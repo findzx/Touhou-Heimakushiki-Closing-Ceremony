@@ -658,10 +658,10 @@ ManeuveringPackage::ManeuveringPackage()
 
     // clang-format on
 
-    DefensiveHorse *hualiu = new DefensiveHorse(Card::Diamond, 13);
-    hualiu->setObjectName("HuaLiu");
+    //DefensiveHorse *hualiu = new DefensiveHorse(Card::Diamond, 13);
+    //hualiu->setObjectName("HuaLiu");
 
-    cards << hualiu;
+    //cards << hualiu;
 
     foreach (Card *card, cards)
         card->setParent(this);

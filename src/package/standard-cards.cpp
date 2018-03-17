@@ -2288,27 +2288,7 @@ StandardCardPackage::StandardCardPackage()
     skills << new DoubleSwordSkill << new QinggangSwordSkill  << new SpearSkill << new AxeSkill << new KylinBowSkill << new EightDiagramSkill << new HalberdSkill
            << new BreastPlateSkill << new TribladeSkill; //<< new BladeSkill
 
-    QList<Card *> horses;
 
-    // clang-format off
-
-    horses << new DefensiveHorse(Card::Spade, 5)
-           << new DefensiveHorse(Card::Club, 5)
-           << new DefensiveHorse(Card::Heart, 13)
-           << new OffensiveHorse(Card::Heart, 5)
-           << new OffensiveHorse(Card::Spade, 13)
-           << new OffensiveHorse(Card::Diamond, 13);
-
-    // clang-format on
-
-    horses.at(0)->setObjectName("JueYing");
-    horses.at(1)->setObjectName("DiLu");
-    horses.at(2)->setObjectName("ZhuaHuangFeiDian");
-    horses.at(3)->setObjectName("ChiTu");
-    horses.at(4)->setObjectName("DaYuan");
-    horses.at(5)->setObjectName("ZiXing");
-
-    cards << horses;
 
     addMetaObject<TribladeCard>();
     skills << new HorseSkill;

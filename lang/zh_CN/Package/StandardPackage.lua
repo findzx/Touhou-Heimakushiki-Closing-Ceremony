@@ -65,10 +65,20 @@ local t = {
 	["JueYing"] = "绝影",
 	["DiLu"] = "的卢",
 	["ZhuaHuangFeiDian"] = "爪黄飞电",
+	
+	["OrleansNingyo"] = "奥尔良人形",
+	["DutchNingyo"] = "荷兰人形",
+	["TibetanNingyo"] = "西藏人形",
+	["KyotoNingyo"] = "京都人形",
+	
 	[":-1 horse"] = "装备牌·坐骑<br />坐骑效果：你与其他角色的距离-1。",
 	["ChiTu"] = "赤兔",
 	["DaYuan"] = "大宛",
 	["ZiXing"] = "紫骍",
+	["LondonNingyo"] = "伦敦人形",
+	["FrenchNingyo"] = "法兰西人形",
+	["RussianNingyo"] = "俄罗斯人形",
+	
 
 	["amazing_grace"] = "节庆席宴",
 	[":amazing_grace"] = "锦囊牌<br />出牌时机：出牌阶段<br />使用目标：所有角色。<br />作用效果：你亮出牌堆顶等于现存角色数量的牌，每名目标角色获得其中一张牌。",
@@ -157,8 +167,10 @@ local t = {
 	["#DeathSickle"] = "%from 体力下限增加了%arg2 点， 当前体力下限 为 %arg 点。",
 }
 
-local ohorses = { "ChiTu", "DaYuan", "ZiXing"}
-local dhorses = { "ZhuaHuangFeiDian", "DiLu", "JueYing", "HuaLiu" }
+--local ohorses = { "ChiTu", "DaYuan", "ZiXing"}
+--local dhorses = { "ZhuaHuangFeiDian", "DiLu", "JueYing", "HuaLiu" }
+local ohorses = { "LondonNingyo", "FrenchNingyo", "RussianNingyo"}
+local dhorses = { "OrleansNingyo", "DutchNingyo", "TibetanNingyo", "KyotoNingyo" }
 
 for _, horse in ipairs(ohorses) do
 	t[":" .. horse] = t[":-1 horse"]

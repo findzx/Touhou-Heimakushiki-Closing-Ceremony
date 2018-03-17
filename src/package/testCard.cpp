@@ -783,8 +783,29 @@ TestCardPackage::TestCardPackage()
         << new RenwangShield(Card::Club, 1)//need check // Tengufs Shield
         
         << new EightDiagram(Card::Club, 1) // Yukari's Gap
+
+        
+        
         ;;
-       
+    QList<Card *> horses;
+
+    horses << new DefensiveHorse(Card::Spade, 5)
+        << new DefensiveHorse(Card::Club, 5)
+        << new DefensiveHorse(Card::Heart, 13)
+        << new DefensiveHorse(Card::Diamond, 13)
+        << new OffensiveHorse(Card::Heart, 5)
+        << new OffensiveHorse(Card::Spade, 13)
+        << new OffensiveHorse(Card::Diamond, 13);
+    horses.at(0)->setObjectName("OrleansNingyo");
+    horses.at(1)->setObjectName("DutchNingyo");
+    horses.at(2)->setObjectName("TibetanNingyo");
+    horses.at(3)->setObjectName("KyotoNingyo");
+
+    horses.at(4)->setObjectName("LondonNingyo");
+    horses.at(5)->setObjectName("FrenchNingyo");
+    horses.at(6)->setObjectName("RussianNingyo");
+    cards << horses;
+
     foreach(Card *card, cards)
         card->setParent(this);
 
