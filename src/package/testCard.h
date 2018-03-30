@@ -117,6 +117,14 @@ public:
     Q_INVOKABLE Raiment(Card::Suit suit, int number);
 };
 
+class Scenery : public Treasure
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Scenery(Card::Suit suit, int number);
+};
+
 class TestCardPackage : public Package
 {
     Q_OBJECT

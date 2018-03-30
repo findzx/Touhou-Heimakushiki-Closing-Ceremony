@@ -717,6 +717,61 @@ Raiment::Raiment(Suit suit, int number)
     setObjectName("Raiment");
 }
 
+
+
+class ScenerySkill : public TreasureSkill
+{
+public:
+    ScenerySkill()
+        : TreasureSkill("Scenery")
+    {
+        events << QuitDying;
+    }
+
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent, const Room *room, const QVariant &data) const
+    {
+        DyingStruct dying = data.value<DyingStruct>();
+
+        if (!dying.who || dying.who->isDead())
+            return QList<SkillInvokeDetail>();
+
+        foreach(ServerPlayer *p, room->getAlivePlayers()) {
+            if (equipAvailable(p, EquipCard::TreasureLocation, objectName())) {
+                if (p == dying.who
+                    || (p != dying.who && room->getAlivePlayers().length() > 2))
+                    return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, p, p);
+            }
+        }
+        return QList<SkillInvokeDetail>();
+    }
+
+    bool cost(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        DyingStruct dying = data.value<DyingStruct>();
+        QList<ServerPlayer *> targets = room->getOtherPlayers(invoke->invoker);
+        targets.removeOne(dying.who);
+        ServerPlayer *target = room->askForPlayerChosen(invoke->invoker, targets, objectName(), "@Scenery", true, true);
+        if (target)
+            invoke->targets << target;
+        return target != NULL;
+    }
+
+    bool effect(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        room->loseHp(invoke->targets.first());
+        return false;
+    }
+};
+
+
+Scenery::Scenery(Suit suit, int number)
+    : Treasure(suit, number)
+{
+    setObjectName("Scenery");
+}
+
+
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
@@ -784,6 +839,7 @@ TestCardPackage::TestCardPackage()
         
         << new EightDiagram(Card::Club, 1) // Yukari's Gap
 
+
         
         
         ;;
@@ -806,11 +862,17 @@ TestCardPackage::TestCardPackage()
     horses.at(6)->setObjectName("RussianNingyo");
     cards << horses;
 
+
+    //Grimoire of Alice
+    //The Scenery of Hell
+    cards << new Scenery(Card::Spade, 5);
+
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
-        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill;
+        <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill
+        << new ScenerySkill;
 }
 
 ADD_PACKAGE(TestCard)
