@@ -125,6 +125,14 @@ public:
     Q_INVOKABLE Scenery(Card::Suit suit, int number);
 };
 
+class Chronicle : public Treasure
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Chronicle(Card::Suit suit, int number);
+};
+
 class TestCardPackage : public Package
 {
     Q_OBJECT

@@ -772,6 +772,46 @@ Scenery::Scenery(Suit suit, int number)
 }
 
 
+class ChronicleSkill : public TreasureSkill
+{
+public:
+    ChronicleSkill()
+        : TreasureSkill("Chronicle")
+    {
+        events << EventPhaseStart << EventPhaseChanging;
+    }
+
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent triggerEvent, const Room *room, const QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseStart) {
+            ServerPlayer *player = data.value<ServerPlayer *>();
+            if (player->getPhase() == Player::RoundStart && equipAvailable(player, EquipCard::TreasureLocation, objectName())) {
+                return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, player, player);
+            }
+        } else if (triggerEvent == EventPhaseChanging) {
+            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+            if (change.player->isAlive() &&  change.to == Player::NotActive && equipAvailable(change.player, EquipCard::TreasureLocation, objectName())) {
+                return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, change.player, change.player);
+            }
+        }
+        return QList<SkillInvokeDetail>();
+    }
+
+
+    bool effect(TriggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        room->askForGuanxing(invoke->invoker, room->getNCards(1), Room::GuanxingBothSides, objectName());
+        return false;
+    }
+};
+
+Chronicle::Chronicle(Suit suit, int number)
+    : Treasure(suit, number)
+{
+    setObjectName("Chronicle");
+}
+
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
@@ -865,14 +905,14 @@ TestCardPackage::TestCardPackage()
 
     //Grimoire of Alice
     //The Scenery of Hell
-    cards << new Scenery(Card::Spade, 5);
+    cards << new Scenery(Card::Spade, 5) << new Chronicle(Card::Spade, 5);
 
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
         <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill
-        << new ScenerySkill;
+        << new ScenerySkill << new ChronicleSkill;
 }
 
 ADD_PACKAGE(TestCard)
