@@ -490,6 +490,7 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<Skil
     case CardEffected: {
         if (data.canConvert<CardEffectStruct>()) {
             CardEffectStruct effect = data.value<CardEffectStruct>();
+            
             if (!effect.card->isKindOf("Slash") && effect.nullified) {
                 LogMessage log;
                 log.type = "#CardNullified";
@@ -505,6 +506,8 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<Skil
                 } else {
                     room->getThread()->trigger(TrickEffect, room, data);
                 }
+                if (effect.nullified)
+                    return true;
             }
             if (effect.to->isAlive() || effect.card->isKindOf("Slash"))
                 effect.card->onEffect(effect);

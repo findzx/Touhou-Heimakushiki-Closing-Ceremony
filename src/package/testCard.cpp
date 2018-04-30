@@ -812,6 +812,137 @@ Chronicle::Chronicle(Suit suit, int number)
     setObjectName("Chronicle");
 }
 
+
+ScrollCard::ScrollCard()
+{
+    target_fixed = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+    m_skillName = "Scroll";
+}
+
+void ScrollCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const
+{
+    source->addToPile("Scroll", subcards);
+}
+
+class ScrollSkill : public OneCardViewAsSkill
+{
+public:
+    ScrollSkill()
+        : OneCardViewAsSkill("Scroll")
+    {
+        filter_pattern = ".|.|.|hand";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const
+    {
+        return player->getPile("Scroll").isEmpty() && player->hasTreasure(objectName());
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const
+    {
+        ScrollCard *card = new ScrollCard;
+        card->addSubcard(originalCard);
+        card->setSkillName("Scroll");
+        return card;
+    }
+};
+
+class ScrollTriggerSkill : public TreasureSkill
+{
+public:
+    ScrollTriggerSkill()
+        : TreasureSkill("ScrollTriggerSkill")
+    {
+        events << CardsMoveOneTime << CardEffected;
+        global = true;
+    }
+
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent e, const Room *room, const QVariant &data) const
+    {
+        if (e == CardEffected) {
+            CardEffectStruct effect = data.value<CardEffectStruct>();
+            if (!effect.to->getPile("Scroll").isEmpty() && effect.card->getTypeId() == Card::TypeTrick) {
+                foreach(int id, effect.to->getPile("Scroll")) {
+                    if (Sanguosha->getCard(id)->getSuit() == effect.card->getSuit()) {
+                        return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, effect.to, effect.to);
+                    }
+                }
+            }
+        
+        }
+        if (e == CardsMoveOneTime) {
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.from == NULL || move.from->getPile("Scroll").isEmpty())
+                return QList<SkillInvokeDetail>();
+
+            for (int i = 0; i < move.card_ids.size(); i++) {
+                if (move.from_places[i] != Player::PlaceEquip)
+                    continue;
+                const Card *card = Sanguosha->getEngineCard(move.card_ids[i]);
+                if (card->objectName() == "Scroll") {
+                    ServerPlayer *invoker = qobject_cast<ServerPlayer *>(move.from);
+                    if (!move.reason.m_playerId.isEmpty())
+                        invoker = room->findPlayerByObjectName(move.reason.m_playerId);
+
+                    return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, qobject_cast<ServerPlayer *>(move.from), invoker, NULL, true);
+                }
+            }
+        
+        }
+        
+        
+        return QList<SkillInvokeDetail>();
+    }
+
+    bool effect(TriggerEvent e, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        QList<int> ids;
+        if (e == CardEffected) {
+            CardEffectStruct effect = data.value<CardEffectStruct>();
+            
+            foreach(int id, effect.to->getPile("Scroll")) {
+                if (Sanguosha->getCard(id)->getColor() == effect.card->getColor()) {
+                    ids << id;
+                }
+            }
+
+            effect.nullified = true;
+            data = QVariant::fromValue(effect);
+        }
+        
+
+        if (e == CardsMoveOneTime) {
+            ids = invoke->invoker->getPile("Scroll");
+        }
+        
+        if (!ids.isEmpty()) {
+            CardsMoveStruct move(ids, invoke->invoker, invoke->invoker, Player::PlaceSpecial, Player::PlaceHand, CardMoveReason(CardMoveReason::S_REASON_UNKNOWN, QString()));
+            room->moveCardsAtomic(move, true);
+        }
+
+        return false;
+    }
+};
+
+Scroll::Scroll(Suit suit, int number)
+    : Treasure(suit, number)
+{
+    setObjectName("Scroll");
+}
+
+
+
+
+
+
+
+
+
+
+
 TestCardPackage::TestCardPackage()
     : Package("testCard", Package::CardPack)
 {
@@ -904,15 +1035,20 @@ TestCardPackage::TestCardPackage()
 
 
     //Grimoire of Alice
-    //The Scenery of Hell
-    cards << new Scenery(Card::Spade, 5) << new Chronicle(Card::Spade, 5);
+    //Ibaraki Box
+    
+    cards << new Scenery(Card::Spade, 5) //The Scenery of Hell
+        << new Chronicle(Card::Spade, 5)  //Gensokyo Chronicle
+        << new Scroll(Card::Spade, 5); //Sorcerer's Sutra Scroll
 
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
         <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill
-        << new ScenerySkill << new ChronicleSkill;
+        << new ScenerySkill << new ChronicleSkill << new ScrollSkill << new ScrollTriggerSkill;
+
+    addMetaObject<ScrollCard>();
 }
 
 ADD_PACKAGE(TestCard)

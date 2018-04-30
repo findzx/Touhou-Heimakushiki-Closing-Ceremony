@@ -133,6 +133,26 @@ public:
     Q_INVOKABLE Chronicle(Card::Suit suit, int number);
 };
 
+
+class Scroll : public Treasure
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Scroll(Card::Suit suit, int number);
+
+};
+
+class ScrollCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ScrollCard();
+
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
 class TestCardPackage : public Package
 {
     Q_OBJECT
