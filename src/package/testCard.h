@@ -153,6 +153,28 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
+
+
+class IbukiGourd : public Treasure
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE IbukiGourd(Card::Suit suit, int number);
+
+};
+
+class IbukiGourdCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE IbukiGourdCard();
+
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual const Card *validate(CardUseStruct &cardUse) const;
+};
+
 class TestCardPackage : public Package
 {
     Q_OBJECT

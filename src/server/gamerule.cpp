@@ -221,14 +221,14 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<Skil
     }
     case EventPhaseEnd: {
         foreach (ServerPlayer *p, room->getAllPlayers()) {
-            if (p->getMark("drank") > 0) {
+            /*if (p->getMark("drank") > 0) {
                 LogMessage log;
                 log.type = "#UnsetDrankEndOfTurn";
                 log.from = p;
                 room->sendLog(log);
 
                 room->setPlayerMark(p, "drank", 0);
-            }
+            }*/
         }
         ServerPlayer *player = data.value<ServerPlayer *>();
         if (player->getPhase() == Player::Play)
@@ -243,6 +243,14 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<Skil
             room->clearPlayerCardLimitation(player, true);
             room->setPlayerMark(player, "touhou-extra", 0);
             foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                if (p->getMark("drank") > 0) {
+                    LogMessage log;
+                    log.type = "#UnsetDrankEndOfTurn";
+                    log.from = p;
+                    room->sendLog(log);
+
+                    room->setPlayerMark(p, "drank", 0);
+                }
                 foreach (QString flag, p->getFlagList()) {
                     if (flag.endsWith("Animate"))
                         room->setPlayerFlag(p, "-" + flag);

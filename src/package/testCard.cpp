@@ -636,7 +636,7 @@ public:
         return QList<SkillInvokeDetail>();
     }
 
-    bool effect(TriggerEvent triggerEvent, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    bool effect(TriggerEvent , Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
     {
         DamageStruct damage = data.value<DamageStruct>();
         LogMessage log;
@@ -935,8 +935,137 @@ Scroll::Scroll(Suit suit, int number)
 
 
 
+IbukiGourdCard::IbukiGourdCard()
+{
+}
+
+bool IbukiGourdCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
+{
+    return to_select = Self;
+}
+
+const Card *IbukiGourdCard::validate(CardUseStruct &use) const
+{
+    if (!use.from->hasFlag("Global_Dying")) {
+        use.from->skip(Player::Judge);
+        use.from->skip(Player::Draw);
+    }
+    else if (use.from->getTreasure()) {
+        int id = use.from->getTreasure()->getId();
+        use.from->getRoom()->throwCard(id, use.from, use.from);
+    }
+
+    Analeptic *ana = new Analeptic(Card::NoSuit, 0);
+    ana->setSkillName("_IbukiGourd");
+    
+    return ana;
+
+}
 
 
+class IbukiGourdVS : public ZeroCardViewAsSkill
+{
+public:
+    IbukiGourdVS()
+        : ZeroCardViewAsSkill("IbukiGourd")
+    {
+        response_pattern = "@@IbukiGourd";
+    }
+
+    virtual const Card *viewAs() const
+    {
+        return new IbukiGourdCard;
+    }
+};
+
+class IbukiGourdSkill : public TreasureSkill
+{
+public:
+    IbukiGourdSkill()
+        : TreasureSkill("IbukiGourd")
+    {
+        events << EventPhaseChanging << Dying;
+        view_as_skill = new IbukiGourdVS;
+    }
+
+
+    QList<SkillInvokeDetail> triggerable(TriggerEvent e, const Room *room, const QVariant &data) const
+    {
+        if (e == EventPhaseChanging) {
+            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+            ServerPlayer *current = change.player;
+            if (!current || current->isDead() || change.to != Player::Judge)
+                return QList<SkillInvokeDetail>();
+
+
+            if (equipAvailable(current, EquipCard::TreasureLocation, objectName()) && !current->isSkipped(Player::Judge) && !current->isSkipped(Player::Draw)) {
+                Analeptic *ana = new Analeptic(Card::NoSuit, 0);
+                ana->deleteLater();
+                if (!current->isCardLimited(ana, Card::MethodUse)) {
+                    return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, current, current);
+                }
+            }
+            
+            return QList<SkillInvokeDetail>();
+        }
+        if (e == Dying) {
+            ServerPlayer *who = data.value<DyingStruct>().who;
+            if (who->getHp() < who->dyingThreshold() && equipAvailable(who, EquipCard::TreasureLocation, objectName()) && who->getTreasure()) {
+                Analeptic *ana = new Analeptic(Card::NoSuit, 0);
+                ana->deleteLater();
+                if (!who->isCardLimited(ana, Card::MethodUse)) {
+                    return QList<SkillInvokeDetail>() << SkillInvokeDetail(this, who, who);
+                }
+            }
+        }
+
+        return QList<SkillInvokeDetail>();
+    }
+
+
+    bool cost(TriggerEvent e, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        if (e == Dying && invoke->invoker->getTreasure())
+            room->askForUseCard(invoke->invoker, "@@IbukiGourd", "@IbukiGourd1");
+        else if (e == EventPhaseChanging)
+            room->askForUseCard(invoke->invoker, "@@IbukiGourd", "@IbukiGourd2");
+         return false;
+    }
+
+    /*bool effect(TriggerEvent e, Room *room, QSharedPointer<SkillInvokeDetail> invoke, QVariant &data) const
+    {
+        if (e == Dying && invoke->invoker->getTreasure()) {
+            int id = invoke->invoker->getTreasure()->getId();
+            room->throwCard(id, invoke->invoker, invoke->invoker);
+        }
+        else if (e == EventPhaseChanging) {
+            invoke->invoker->skip(Player::Judge);
+            invoke->invoker->skip(Player::Start);
+        }
+        Analeptic *ana = new Analeptic(Card::NoSuit, 0);
+        ana->setSkillName("_"+objectName());
+        CardUseStruct carduse;
+        carduse.card = ana;
+        carduse.from = invoke->invoker;
+        if (Sanguosha->getCurrentCardUseReason() != CardUseStruct::CARD_USE_REASON_PLAY) {
+            invoke->invoker->gainMark("@woca");
+        }
+        else
+            invoke->invoker->gainMark("@emmm");
+        carduse.m_reason = CardUseStruct::CARD_USE_REASON_RESPONSE_USE;
+        room->useCard(carduse);
+        
+
+
+        return false;
+    }*/
+};
+
+IbukiGourd::IbukiGourd(Suit suit, int number)
+    : Treasure(suit, number)
+{
+    setObjectName("IbukiGourd");
+}
 
 
 
@@ -1039,16 +1168,17 @@ TestCardPackage::TestCardPackage()
     
     cards << new Scenery(Card::Spade, 5) //The Scenery of Hell
         << new Chronicle(Card::Spade, 5)  //Gensokyo Chronicle
-        << new Scroll(Card::Spade, 5); //Sorcerer's Sutra Scroll
-
+        << new Scroll(Card::Spade, 5) //Sorcerer's Sutra Scroll
+        << new IbukiGourd(Card::Spade, 5);
     foreach(Card *card, cards)
         card->setParent(this);
 
     skills << new CameraSkill << new GunSkill << new JadeSealSkill << new JadeSealTriggerSkill
         <<new CamouflageSkill << new RoukankenHakuroukenSkill << new BladeSkill << new VSCrossbowSkill << new RobeSkill << new RaimentSkill
-        << new ScenerySkill << new ChronicleSkill << new ScrollSkill << new ScrollTriggerSkill;
+        << new ScenerySkill << new ChronicleSkill << new ScrollSkill << new ScrollTriggerSkill << new IbukiGourdSkill;
 
     addMetaObject<ScrollCard>();
+    addMetaObject<IbukiGourdCard>();
 }
 
 ADD_PACKAGE(TestCard)
